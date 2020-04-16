@@ -1,0 +1,38 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: calc(var(--spacing-large) - var(--spacing-small)) calc(var(--spacing-large) - var(--spacing-medium));
+
+    .app-brand {
+        display: block;
+        flex-shrink: 0;
+        outline: none;
+        padding: var(--spacing-small) var(--spacing-medium);
+        text-decoration: none;
+        color: rgba(0, 0, 0, .3);
+        font-size: var(--font-size-large);
+
+        &.active {
+            color: var(--color-accent);
+        }
+    }
+
+    .nav-links {
+        display: flex;
+        flex-grow: 1;
+        justify-content: flex-end;
+        padding: 0 calc(var(--spacing-medium) - var(--spacing-small));
+
+        .link {
+            display: block;
+            outline: none;
+            padding: var(--spacing-small) var(--spacing-medium);
+            text-decoration: none;
+            color: rgba(0, 0, 0, .3);
+
+            &.active {
+                color: var(--color-accent);
+            }
+        }
+    }
+}

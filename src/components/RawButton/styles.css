@@ -1,0 +1,15 @@
+.raw-button {
+    outline: none;
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+
+    &:disabled {
+        color: var(--color-disabled);
+    }
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+}

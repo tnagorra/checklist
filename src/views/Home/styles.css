@@ -1,0 +1,50 @@
+.home {
+    background-color: var(--color-background-alt);
+    overflow: auto;
+
+    .group {
+        display: flex;
+        flex-direction: column;
+
+        .item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--color-separator);
+            padding: var(--spacing-small);
+
+            .text {
+                flex-grow: 1;
+
+                .text-area {
+                    resize: none;
+                }
+
+                .icon {
+                    padding: 0 var(--spacing-medium) 0 0;
+                }
+            }
+        }
+
+        .enter {
+            opacity: 0;
+            max-height: 0;
+        }
+
+        .enter-active {
+            transition: opacity 300ms ease-in, max-height 300ms ease-in;
+            opacity: 1;
+            max-height: 40px;
+        }
+
+        .leave {
+            opacity: 1;
+            max-height: 40px;
+        }
+
+        .leave-active {
+            transition: opacity 300ms ease-out, max-height 300ms ease-out;
+            opacity: 0.01;
+            max-height: 0.01px;
+        }
+    }
+}

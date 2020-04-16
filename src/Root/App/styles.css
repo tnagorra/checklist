@@ -1,0 +1,21 @@
+:root {
+    --height-content: 600px;
+    --width-content: 450px;
+
+    --spacing-small: 6px;
+    --spacing-medium: 10px;
+    --spacing-large: 16px;
+
+    --width-separator-thin: 1px;
+
+    --color-accent: #18bc9c;
+    --color-disabled: #aaaaaa;
+    --color-separator: #dddddd;
+
+    --font-size-medium: 16px;
+    --font-size-large: 20px;
+
+    --font-weight-light: 300;
+    --font-weight-medium: 400;
+    --font-weight-bold: 700;
+}

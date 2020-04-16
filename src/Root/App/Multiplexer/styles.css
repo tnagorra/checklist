@@ -1,0 +1,23 @@
+.multiplexer {
+    display: flex;
+    flex-direction: column;
+    min-width: var(--width-content);
+    min-height: var(--height-content);
+
+    .navbar {
+        flex-shrink: 0;
+    }
+
+    .view {
+        flex-grow: 1;
+        padding: var(--spacing-large);
+        overflow: auto;
+    }
+
+    .loading {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        justify-content: center;
+    }
+}
