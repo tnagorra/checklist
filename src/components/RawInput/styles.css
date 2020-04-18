@@ -4,4 +4,8 @@
     background-color: transparent;
     color: inherit;
     font-family: inherit;
+
+    &:disabled {
+        color: var(--color-disabled);
+    }
 }

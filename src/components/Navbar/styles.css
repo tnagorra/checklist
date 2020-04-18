@@ -2,6 +2,7 @@
     display: flex;
     align-items: center;
     padding: calc(var(--spacing-large) - var(--spacing-small)) calc(var(--spacing-large) - var(--spacing-medium));
+    font-size: var(--font-size-large);
 
     .app-brand {
         display: block;
@@ -10,7 +11,6 @@
         padding: var(--spacing-small) var(--spacing-medium);
         text-decoration: none;
         color: rgba(0, 0, 0, .3);
-        font-size: var(--font-size-large);
 
         &.active {
             color: var(--color-accent);

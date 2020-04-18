@@ -3,7 +3,7 @@ import { _cs } from '@togglecorp/fujs';
 
 import styles from './styles.css';
 
-export interface Props extends Omit<React.HTMLProps<HTMLInputElement>, 'onChange' | 'onKeyUp'>{
+export interface Props extends Omit<React.HTMLProps<HTMLInputElement>, 'onChange' | 'onKeyDown'>{
     className?: string;
     onChange: (
         value: string,

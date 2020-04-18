@@ -1,4 +1,7 @@
 .settings {
-    background-color: var(--color-background-alt);
-    height: var(--height-content);
+    margin-top: var(--spacing-large);
+    background-color: var(--color-background);
+    padding: var(--spacing-large);
+    padding-top: 0;
+    overflow: auto;
 }

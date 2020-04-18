@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { FiSquare, FiCheckSquare, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiSquare, FiCheckSquare, FiPlusSquare, FiTrash2 } from 'react-icons/fi';
 import { _cs, randomString } from '@togglecorp/fujs';
 
 import TextInput from '#components/TextInput';
@@ -121,7 +121,6 @@ const Home = (props: Props) => {
                     setFocusedItem(newItem.key);
                 }
             } else if (key === 'Backspace') {
-                console.warn(activeItems);
                 if (value !== '') {
                     return;
                 }
@@ -138,7 +137,6 @@ const Home = (props: Props) => {
 
                 if (index !== activeItems.length - 1) {
                     const newItem = activeItems[index + 1];
-                    console.warn('focused item', newItem.key);
                     setFocusedItem(newItem.key);
                 }
             }
@@ -255,7 +253,7 @@ const Home = (props: Props) => {
                                         title="Add new task"
                                         disabled
                                     >
-                                        <FiPlus />
+                                        <FiPlusSquare />
                                     </RawButton>
                                 )}
                                 actions={
@@ -305,8 +303,8 @@ const Home = (props: Props) => {
                                 onChange={handleEdit}
                                 value={item.value}
                                 rows={1}
-                                disabled={rehydrating}
-                                readOnly
+                                // disabled={rehydrating}
+                                disabled
                                 icons={(
                                     <RawButton
                                         className={styles.checkbox}

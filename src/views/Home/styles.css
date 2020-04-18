@@ -38,6 +38,10 @@
                 }
             }
 
+            &:focus-within {
+                border-bottom: 1px solid var(--color-accent);
+            }
+
             &:hover {
                 .text {
                     .delete-button {

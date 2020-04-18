@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { FiSettings } from 'react-icons/fi';
 import { _cs } from '@togglecorp/fujs';
 
 import styles from './styles.css';
@@ -28,7 +29,7 @@ const Navbar = (props: Props) => {
                     activeClassName={styles.active}
                     to="/settings/"
                 >
-                    settings
+                    <FiSettings />
                 </NavLink>
             </div>
         </nav>
