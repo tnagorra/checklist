@@ -22,6 +22,7 @@ interface Props {
 const Home = (props: Props) => {
     const { className } = props;
 
+    const [focusedItem, setFocusedItem] = useState<string | undefined>();
     const [items, setItems] = useState<Item[]>([]);
 
     const handleEdit = useCallback(
@@ -92,12 +93,37 @@ const Home = (props: Props) => {
         [items],
     );
 
+    const handleKeyUp = useCallback(
+        (key: string, value: string, name: string) => {
+            if (key === 'Enter') {
+                const index = activeItems.findIndex(item => item.key === name);
+                if (index !== -1 && index !== activeItems.length - 1) {
+                    const newIndex = index + 1;
+                    const newItem = activeItems[newIndex];
+                    setFocusedItem(newItem.key);
+                }
+            } else if (key === 'Backspace' && value === '') {
+                const index = activeItems.findIndex(item => item.key === name);
+                if (index !== activeItems.length - 1) {
+                    handleDelete(name);
+                    if (index !== -1 && index !== 0) {
+                        const newIndex = index - 1;
+                        const newItem = activeItems[newIndex];
+                        setFocusedItem(newItem.key);
+                    }
+                }
+            }
+        },
+        [activeItems, handleDelete],
+    );
+
     const [rehydrating, setRehydrating] = useState(true);
     useEffect(
         () => {
             chrome.storage.local.get(['items'], (storedItems) => {
                 const safeStoredItems = storedItems as { items: Item[] };
-                if (safeStoredItems.items) {
+                console.warn(safeStoredItems);
+                if (safeStoredItems.items && safeStoredItems.items.length > 0) {
                     setItems(safeStoredItems.items);
                 } else {
                     setItems([
@@ -144,6 +170,11 @@ const Home = (props: Props) => {
 
     return (
         <div className={_cs(className, styles.home)}>
+            {activeItems.length > 0 && (
+                <h3>
+                    Todo
+                </h3>
+            )}
             <CSSTransitionGroup
                 className={styles.group}
                 transitionName={{
@@ -155,17 +186,13 @@ const Home = (props: Props) => {
                 transitionEnterTimeout={300}
                 transitionLeaveTimeout={300}
             >
-                {items.length > 0 && (
-                    <h3 key="header">
-                        Todo
-                    </h3>
-                )}
                 {activeItems.map((item, index) => (
                     <div
                         className={styles.item}
                         key={item.key}
                     >
                         <TextInput
+                            focused={focusedItem === item.key}
                             className={styles.text}
                             inputClassName={styles.textArea}
                             // wrap="soft"
@@ -173,6 +200,7 @@ const Home = (props: Props) => {
                             // autoFocus={item.key === autoFocusKey}
                             name={item.key}
                             onChange={handleEdit}
+                            onKeyUp={handleKeyUp}
                             value={item.value}
                             disabled={rehydrating}
                             placeholder={
@@ -182,7 +210,7 @@ const Home = (props: Props) => {
                             }
                             icons={index !== activeItems.length - 1 ? (
                                 <RawButton
-                                    className={styles.icon}
+                                    className={styles.checkbox}
                                     name={item.key}
                                     onClick={handleArchiveToggle}
                                     tabIndex={-1}
@@ -192,7 +220,7 @@ const Home = (props: Props) => {
                                 </RawButton>
                             ) : (
                                 <RawButton
-                                    className={styles.icon}
+                                    className={styles.checkbox}
                                     // name={item.key}
                                     // onClick={handleArchiveToggle}
                                     tabIndex={-1}
@@ -205,7 +233,7 @@ const Home = (props: Props) => {
                             actions={
                                 index !== activeItems.length - 1 && (
                                     <RawButton
-                                        className={styles.icon}
+                                        className={styles.deleteButton}
                                         name={item.key}
                                         onClick={handleDelete}
                                         tabIndex={-1}
@@ -219,6 +247,11 @@ const Home = (props: Props) => {
                     </div>
                 ))}
             </CSSTransitionGroup>
+            {archivedItems.length > 0 && (
+                <h3>
+                    Done
+                </h3>
+            )}
             <CSSTransitionGroup
                 className={styles.group}
                 transitionName={{
@@ -230,11 +263,6 @@ const Home = (props: Props) => {
                 transitionEnterTimeout={300}
                 transitionLeaveTimeout={300}
             >
-                {archivedItems.length > 0 && (
-                    <h3 key="header">
-                        Done
-                    </h3>
-                )}
                 {archivedItems.map((item, index) => (
                     <div
                         className={styles.item}
@@ -252,7 +280,7 @@ const Home = (props: Props) => {
                             readOnly
                             icons={(
                                 <RawButton
-                                    className={styles.icon}
+                                    className={styles.checkbox}
                                     name={item.key}
                                     onClick={handleArchiveToggle}
                                     tabIndex={-1}
@@ -263,7 +291,7 @@ const Home = (props: Props) => {
                             )}
                             actions={(
                                 <RawButton
-                                    className={styles.icon}
+                                    className={styles.deleteButton}
                                     name={item.key}
                                     onClick={handleDelete}
                                     tabIndex={-1}

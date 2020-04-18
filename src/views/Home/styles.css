@@ -10,7 +10,6 @@
             display: flex;
             align-items: center;
             border-bottom: 1px solid var(--color-separator);
-            padding: var(--spacing-small);
 
             .text {
                 flex-grow: 1;
@@ -19,8 +18,20 @@
                     resize: none;
                 }
 
-                .icon {
+                .checkbox {
                     padding: 0 var(--spacing-medium) 0 0;
+                }
+
+                .delete-button {
+                    visibility: hidden;
+                }
+            }
+
+            &:hover {
+                .text {
+                    .delete-button {
+                        visibility: visible;
+                    }
                 }
             }
         }
@@ -31,20 +42,24 @@
         }
 
         .enter-active {
-            transition: opacity 300ms ease-in, max-height 300ms ease-in;
+            transition-delay: 200ms, 0ms;
+            transition-duration: 100ms, 200ms;
+            transition-property: opacity, max-height;
             opacity: 1;
-            max-height: 40px;
+            max-height: 45px;
         }
 
         .leave {
             opacity: 1;
-            max-height: 40px;
+            max-height: 45px;
         }
 
         .leave-active {
-            transition: opacity 300ms ease-out, max-height 300ms ease-out;
-            opacity: 0.01;
-            max-height: 0.01px;
+            transition-delay: 0ms, 0ms;
+            transition-duration: 100ms, 200ms;
+            transition-property: opacity, max-height;
+            opacity: 0;
+            max-height: 0;
         }
     }
 }
