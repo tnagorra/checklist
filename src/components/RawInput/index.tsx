@@ -5,8 +5,17 @@ import styles from './styles.css';
 
 export interface Props extends Omit<React.HTMLProps<HTMLInputElement>, 'onChange' | 'onKeyUp'>{
     className?: string;
-    onChange: (value: string, name: string) => void;
-    onKeyUp?: (key: string, value: string, name: string) => void;
+    onChange: (
+        value: string,
+        name: string,
+        e: React.FormEvent<HTMLInputElement>,
+    ) => void;
+    onKeyDown?: (
+        key: string,
+        value: string,
+        name: string,
+        e: React.KeyboardEvent<HTMLInputElement>,
+    ) => void;
     focused?: boolean;
 }
 
@@ -14,7 +23,7 @@ function RawInput(props: Props) {
     const {
         className,
         onChange,
-        onKeyUp,
+        onKeyDown,
         focused,
         ...otherProps
     } = props;
@@ -29,10 +38,10 @@ function RawInput(props: Props) {
             },
         } = e;
 
-        onChange(value, name);
+        onChange(value, name, e);
     };
 
-    const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const {
             key,
             currentTarget: {
@@ -41,8 +50,8 @@ function RawInput(props: Props) {
             },
         } = e;
 
-        if (onKeyUp) {
-            onKeyUp(key, value, name);
+        if (onKeyDown) {
+            onKeyDown(key, value, name, e);
         }
     };
 
@@ -60,7 +69,7 @@ function RawInput(props: Props) {
         <input
             ref={inputRef}
             onChange={handleChange}
-            onKeyUp={handleKeyUp}
+            onKeyDown={handleKeyDown}
             className={_cs(className, styles.rawInput)}
             {...otherProps}
         />

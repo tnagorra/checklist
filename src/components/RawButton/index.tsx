@@ -7,7 +7,7 @@ type ButtonType = 'button' | 'submit' | 'reset';
 
 export interface Props extends Omit<React.HTMLProps<HTMLButtonElement>, 'onClick' | 'ref' | 'type'>{
     className?: string;
-    onClick?: (name: string) => void;
+    onClick?: (name: string, e: React.MouseEvent<HTMLButtonElement>) => void;
     // elementRef: React.RefObject<HTMLButtonElement>;
     type: ButtonType;
 }

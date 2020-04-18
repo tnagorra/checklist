@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { CSSTransitionGroup } from 'react-transition-group';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { FiSquare, FiCheckSquare, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { _cs, randomString } from '@togglecorp/fujs';
 
@@ -24,6 +24,13 @@ const Home = (props: Props) => {
 
     const [focusedItem, setFocusedItem] = useState<string | undefined>();
     const [items, setItems] = useState<Item[]>([]);
+
+    const handleFocusOut = useCallback(
+        () => {
+            setFocusedItem(undefined);
+        },
+        [],
+    );
 
     const handleEdit = useCallback(
         (value: string, key: string) => {
@@ -93,24 +100,46 @@ const Home = (props: Props) => {
         [items],
     );
 
-    const handleKeyUp = useCallback(
-        (key: string, value: string, name: string) => {
+    const handleKeyDown = useCallback(
+        (
+            key: string,
+            value: string,
+            name: string,
+            event: React.KeyboardEvent<HTMLInputElement>,
+        ) => {
             if (key === 'Enter') {
+                event.preventDefault();
+
                 const index = activeItems.findIndex(item => item.key === name);
-                if (index !== -1 && index !== activeItems.length - 1) {
-                    const newIndex = index + 1;
-                    const newItem = activeItems[newIndex];
+                if (index === -1) {
+                    return;
+                }
+
+                // No need to go further if it is the last element
+                if (index !== activeItems.length - 1) {
+                    const newItem = activeItems[index + 1];
                     setFocusedItem(newItem.key);
                 }
-            } else if (key === 'Backspace' && value === '') {
+            } else if (key === 'Backspace') {
+                console.warn(activeItems);
+                if (value !== '') {
+                    return;
+                }
+
+                event.preventDefault();
+
                 const index = activeItems.findIndex(item => item.key === name);
+                // NOTE: lets not delete the last item
+                if (index === -1 || index === activeItems.length - 1) {
+                    return;
+                }
+
+                handleDelete(name);
+
                 if (index !== activeItems.length - 1) {
-                    handleDelete(name);
-                    if (index !== -1 && index !== 0) {
-                        const newIndex = index - 1;
-                        const newItem = activeItems[newIndex];
-                        setFocusedItem(newItem.key);
-                    }
+                    const newItem = activeItems[index + 1];
+                    console.warn('focused item', newItem.key);
+                    setFocusedItem(newItem.key);
                 }
             }
         },
@@ -122,7 +151,6 @@ const Home = (props: Props) => {
         () => {
             chrome.storage.local.get(['items'], (storedItems) => {
                 const safeStoredItems = storedItems as { items: Item[] };
-                console.warn(safeStoredItems);
                 if (safeStoredItems.items && safeStoredItems.items.length > 0) {
                     setItems(safeStoredItems.items);
                 } else {
@@ -171,67 +199,126 @@ const Home = (props: Props) => {
     return (
         <div className={_cs(className, styles.home)}>
             {activeItems.length > 0 && (
-                <h3>
-                    Todo
+                <h3 className={styles.header}>
+                    {`Todo (${activeItems.length - 1})`}
                 </h3>
             )}
-            <CSSTransitionGroup
-                className={styles.group}
-                transitionName={{
-                    enter: styles.enter,
-                    enterActive: styles.enterActive,
-                    leave: styles.leave,
-                    leaveActive: styles.leaveActive,
-                }}
-                transitionEnterTimeout={300}
-                transitionLeaveTimeout={300}
-            >
+            <TransitionGroup className={styles.group}>
                 {activeItems.map((item, index) => (
-                    <div
-                        className={styles.item}
+                    <CSSTransition
                         key={item.key}
+                        classNames={{
+                            enter: styles.enter,
+                            enterActive: styles.enterActive,
+                            exit: styles.exit,
+                            exitActive: styles.exitActive,
+                        }}
+                        timeout={{ enter: 300, exit: 300 }}
                     >
-                        <TextInput
-                            focused={focusedItem === item.key}
-                            className={styles.text}
-                            inputClassName={styles.textArea}
-                            // wrap="soft"
-                            // rows={1}
-                            // autoFocus={item.key === autoFocusKey}
-                            name={item.key}
-                            onChange={handleEdit}
-                            onKeyUp={handleKeyUp}
-                            value={item.value}
-                            disabled={rehydrating}
-                            placeholder={
-                                index === activeItems.length - 1
-                                    ? 'Add new task'
-                                    : undefined
-                            }
-                            icons={index !== activeItems.length - 1 ? (
-                                <RawButton
-                                    className={styles.checkbox}
-                                    name={item.key}
-                                    onClick={handleArchiveToggle}
-                                    tabIndex={-1}
-                                    title="Mark as done"
-                                >
-                                    <FiSquare />
-                                </RawButton>
-                            ) : (
-                                <RawButton
-                                    className={styles.checkbox}
-                                    // name={item.key}
-                                    // onClick={handleArchiveToggle}
-                                    tabIndex={-1}
-                                    title="Add new task"
-                                    disabled
-                                >
-                                    <FiPlus />
-                                </RawButton>
-                            )}
-                            actions={
-                                index !== activeItems.length - 1 && (
+                        <div
+                            className={styles.item}
+                        >
+                            <TextInput
+                                focused={focusedItem === item.key}
+                                className={styles.text}
+                                inputClassName={styles.textArea}
+                                // wrap="soft"
+                                // rows={1}
+                                // autoFocus={item.key === autoFocusKey}
+                                name={item.key}
+                                onChange={handleEdit}
+                                onBlur={handleFocusOut}
+                                onKeyDown={handleKeyDown}
+                                value={item.value}
+                                disabled={rehydrating}
+                                placeholder={
+                                    index === activeItems.length - 1
+                                        ? 'Add new task'
+                                        : undefined
+                                }
+                                icons={index !== activeItems.length - 1 ? (
+                                    <RawButton
+                                        className={styles.checkbox}
+                                        name={item.key}
+                                        onClick={handleArchiveToggle}
+                                        tabIndex={-1}
+                                        title="Mark as done"
+                                    >
+                                        <FiSquare />
+                                    </RawButton>
+                                ) : (
+                                    <RawButton
+                                        className={styles.checkbox}
+                                        // name={item.key}
+                                        // onClick={handleArchiveToggle}
+                                        tabIndex={-1}
+                                        title="Add new task"
+                                        disabled
+                                    >
+                                        <FiPlus />
+                                    </RawButton>
+                                )}
+                                actions={
+                                    index !== activeItems.length - 1 && (
+                                        <RawButton
+                                            className={styles.deleteButton}
+                                            name={item.key}
+                                            onClick={handleDelete}
+                                            tabIndex={-1}
+                                            title="Delete"
+                                        >
+                                            <FiTrash2 />
+                                        </RawButton>
+                                    )
+                                }
+                            />
+                        </div>
+                    </CSSTransition>
+                ))}
+            </TransitionGroup>
+            {archivedItems.length > 0 && (
+                <h3 className={styles.header}>
+                    {`Done (${archivedItems.length})`}
+                </h3>
+            )}
+            <TransitionGroup className={styles.group}>
+                {archivedItems.map((item, index) => (
+                    <CSSTransition
+                        key={item.key}
+                        classNames={{
+                            enter: styles.enter,
+                            enterActive: styles.enterActive,
+                            exit: styles.exit,
+                            exitActive: styles.exitActive,
+                        }}
+                        timeout={{ enter: 300, exit: 300 }}
+                    >
+                        <div
+                            className={styles.item}
+                            key={item.key}
+                        >
+                            <TextInput
+                                className={styles.text}
+                                inputClassName={styles.textArea}
+                                wrap="soft"
+                                name={item.key}
+                                onChange={handleEdit}
+                                value={item.value}
+                                rows={1}
+                                disabled={rehydrating}
+                                readOnly
+                                icons={(
+                                    <RawButton
+                                        className={styles.checkbox}
+                                        name={item.key}
+                                        onClick={handleArchiveToggle}
+                                        tabIndex={-1}
+                                        title="Mark as todo"
+                                    >
+                                        <FiCheckSquare />
+                                    </RawButton>
+                                )}
+                                actions={(
                                     <RawButton
                                         className={styles.deleteButton}
                                         name={item.key}
@@ -241,69 +328,12 @@ const Home = (props: Props) => {
                                     >
                                         <FiTrash2 />
                                     </RawButton>
-                                )
-                            }
-                        />
-                    </div>
+                                )}
+                            />
+                        </div>
+                    </CSSTransition>
                 ))}
-            </CSSTransitionGroup>
-            {archivedItems.length > 0 && (
-                <h3>
-                    Done
-                </h3>
-            )}
-            <CSSTransitionGroup
-                className={styles.group}
-                transitionName={{
-                    enter: styles.enter,
-                    enterActive: styles.enterActive,
-                    leave: styles.leave,
-                    leaveActive: styles.leaveActive,
-                }}
-                transitionEnterTimeout={300}
-                transitionLeaveTimeout={300}
-            >
-                {archivedItems.map((item, index) => (
-                    <div
-                        className={styles.item}
-                        key={item.key}
-                    >
-                        <TextInput
-                            className={styles.text}
-                            inputClassName={styles.textArea}
-                            wrap="soft"
-                            name={item.key}
-                            onChange={handleEdit}
-                            value={item.value}
-                            rows={1}
-                            disabled={rehydrating}
-                            readOnly
-                            icons={(
-                                <RawButton
-                                    className={styles.checkbox}
-                                    name={item.key}
-                                    onClick={handleArchiveToggle}
-                                    tabIndex={-1}
-                                    title="Mark as todo"
-                                >
-                                    <FiCheckSquare />
-                                </RawButton>
-                            )}
-                            actions={(
-                                <RawButton
-                                    className={styles.deleteButton}
-                                    name={item.key}
-                                    onClick={handleDelete}
-                                    tabIndex={-1}
-                                    title="Delete"
-                                >
-                                    <FiTrash2 />
-                                </RawButton>
-                            )}
-                        />
-                    </div>
-                ))}
-            </CSSTransitionGroup>
+            </TransitionGroup>
         </div>
     );
 };

@@ -1,6 +1,17 @@
 .home {
-    background-color: var(--color-background-alt);
+    margin-top: var(--spacing-large);
+    background-color: var(--color-background);
+    padding: var(--spacing-large);
+    padding-top: 0;
     overflow: auto;
+
+    .header {
+        position: sticky;
+        top: 0;
+        margin: 0;
+        background-color: var(--color-background);
+        padding: var(--spacing-large) 0;
+    }
 
     .group {
         display: flex;
@@ -34,32 +45,32 @@
                     }
                 }
             }
-        }
 
-        .enter {
-            opacity: 0;
-            max-height: 0;
-        }
+            &.enter {
+                opacity: 0;
+                max-height: 0;
+            }
 
-        .enter-active {
-            transition-delay: 200ms, 0ms;
-            transition-duration: 100ms, 200ms;
-            transition-property: opacity, max-height;
-            opacity: 1;
-            max-height: 45px;
-        }
+            &.enter-active {
+                transition-delay: 200ms, 0ms;
+                transition-duration: 100ms, 200ms;
+                transition-property: opacity, max-height;
+                opacity: 1;
+                max-height: 45px;
+            }
 
-        .leave {
-            opacity: 1;
-            max-height: 45px;
-        }
+            &.exit {
+                opacity: 1;
+                max-height: 45px;
+            }
 
-        .leave-active {
-            transition-delay: 0ms, 0ms;
-            transition-duration: 100ms, 200ms;
-            transition-property: opacity, max-height;
-            opacity: 0;
-            max-height: 0;
+            &.exit-active {
+                transition-delay: 0ms, 0ms;
+                transition-duration: 100ms, 200ms;
+                transition-property: opacity, max-height;
+                opacity: 0;
+                max-height: 0;
+            }
         }
     }
 }

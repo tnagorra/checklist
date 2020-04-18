@@ -20,16 +20,29 @@
                 padding: 0;
                 font-family: var(--font-family-sans-serif);
             }
+            body {
+                display: flex;
+                overflow-y: auto;
+                height: 600px;
+                width: 480px;
+                background-color: '#f5f5f5';
+            }
 
             * {
                 box-sizing: border-box;
+            }
+
+            #checklist-root {
+                flex-grow: 1;
+                display: flex;
+                overflow-y: auto;
             }
 
         </style>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
     </head>
-    <body style="background-color: #f5f5f5;">
+    <body>
         <noscript>
             checklist needs Javascript.
         </noscript>
