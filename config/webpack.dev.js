@@ -30,7 +30,7 @@ const appSrc = path.resolve(appBase, 'src/');
 const appDist = path.resolve(appBase, 'build/');
 const appIndexJs = path.resolve(appBase, 'src/index.tsx');
 const appIndexHtml = path.resolve(appBase, 'public/index.html');
-const appFavicon = path.resolve(appBase, 'public/favicon.ico');
+// const appFavicon = path.resolve(appBase, 'public/favicon.ico');
 const appIcons = path.resolve(appBase, 'public/icons/');
 
 const base = {
@@ -46,9 +46,9 @@ const base = {
     */
     permissions: ['storage'],
     icons: {
-        16: 'icons/16.png',
-        48: 'icons/48.png',
-        128: 'icons/128.png',
+        16: 'icons/checklist.svg',
+        48: 'icons/checklist.svg',
+        128: 'icons/checklist.svg',
     },
     content_security_policy: "script-src 'self' 'unsafe-eval'; object-src 'self';"
 };
@@ -215,7 +215,7 @@ module.exports = (env) => {
                 template: appIndexHtml,
                 filename: './index.html',
                 title: 'checklist',
-                favicon: path.resolve(appFavicon),
+                // favicon: path.resolve(appFavicon),
                 chunksSortMode: 'none',
             }),
             new MiniCssExtractPlugin({

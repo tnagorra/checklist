@@ -173,9 +173,10 @@ const Home = (props: Props) => {
                 chrome.browserAction.setBadgeText({ text: '' });
             } else {
                 chrome.browserAction.setBadgeText({ text: String(itemsCount) });
-                chrome.browserAction.setBadgeBackgroundColor({
-                    color: '#ff0000',
-                });
+                if (chrome.browserAction.setBadgeTextColor) {
+                    chrome.browserAction.setBadgeTextColor({ color: '#ffffff' });
+                }
+                chrome.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
             }
         },
         [itemsCount, rehydrating],
