@@ -9,13 +9,15 @@ interface Props {
 
 const Settings = (props: Props) => {
     const { className } = props;
+
     return (
-        <div className={_cs(
-            styles.settings,
-            className,
-        )}
+        <div
+            className={_cs(
+                styles.settings,
+                className,
+            )}
         >
-            Settings
+            N/A
         </div>
     );
 };

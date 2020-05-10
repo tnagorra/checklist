@@ -1,5 +1,4 @@
 .home {
-    margin-top: var(--spacing-large);
     background-color: var(--color-background);
     padding: var(--spacing-large);
     padding-top: 0;
@@ -8,72 +7,43 @@
     .header {
         position: sticky;
         top: 0;
+        z-index: 2; /* Need to do this because of absolute items in sortable list) */
         margin: 0;
         background-color: var(--color-background);
-        padding: var(--spacing-large) 0;
+        padding: var(--spacing-small) 0;
     }
 
     .group {
         display: flex;
         flex-direction: column;
+    }
+}
 
-        .item {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--color-separator);
+.item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-separator);
 
-            .text {
-                flex-grow: 1;
+    .text {
+        flex-grow: 1;
 
-                .text-area {
-                    resize: none;
-                }
+        .text-area {
+            resize: none;
+        }
 
-                .checkbox {
-                    padding: 0 var(--spacing-medium) 0 0;
-                }
+        .delete-button {
+            visibility: hidden;
+        }
+    }
 
-                .delete-button {
-                    visibility: hidden;
-                }
-            }
+    &:focus-within {
+        border-bottom: 1px solid var(--color-accent);
+    }
 
-            &:focus-within {
-                border-bottom: 1px solid var(--color-accent);
-            }
-
-            &:hover {
-                .text {
-                    .delete-button {
-                        visibility: visible;
-                    }
-                }
-            }
-
-            &.enter {
-                opacity: 0;
-                max-height: 0;
-            }
-
-            &.enter-active {
-                transition-delay: 200ms, 0ms;
-                transition-duration: 100ms, 200ms;
-                transition-property: opacity, max-height;
-                opacity: 1;
-                max-height: 45px;
-            }
-
-            &.exit {
-                opacity: 1;
-                max-height: 45px;
-            }
-
-            &.exit-active {
-                transition-delay: 0ms, 0ms;
-                transition-duration: 100ms, 200ms;
-                transition-property: opacity, max-height;
-                opacity: 0;
-                max-height: 0;
+    &:hover {
+        .text {
+            .delete-button {
+                visibility: visible;
             }
         }
     }

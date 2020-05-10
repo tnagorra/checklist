@@ -7,7 +7,7 @@ console.info('React version', React.version);
 
 const rootElement = document.getElementById('checklist-root');
 if (rootElement) {
-    ReactDOM.createRoot(rootElement).render(<Root />);
+    ReactDOM.unstable_createRoot(rootElement).render(<Root />);
 } else {
     console.error('Root element was not found');
 }
