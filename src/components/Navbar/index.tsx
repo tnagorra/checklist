@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FiSettings } from 'react-icons/fi';
+// import { FiSettings } from 'react-icons/fi';
 import { _cs } from '@togglecorp/fujs';
 
 import styles from './styles.css';
@@ -22,6 +22,7 @@ const Navbar = (props: Props) => {
             >
                 checklist
             </NavLink>
+            {/*
             <div className={styles.navLinks}>
                 <NavLink
                     exact
@@ -32,6 +33,7 @@ const Navbar = (props: Props) => {
                     <FiSettings />
                 </NavLink>
             </div>
+            */}
         </nav>
     );
 };

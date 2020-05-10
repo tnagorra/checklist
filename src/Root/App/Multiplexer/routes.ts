@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { isDefined } from '@togglecorp/fujs';
+// import { isDefined } from '@togglecorp/fujs';
 
 export interface Route {
     path: string;
@@ -29,6 +29,7 @@ const routeSettings: SomeRoute[] = [
         title: 'Home',
         load: lazy(() => import('../../../views/Home')),
     },
+    /*
     {
         path: '/settings/',
         name: 'settings',
@@ -41,6 +42,7 @@ const routeSettings: SomeRoute[] = [
         title: '403',
         load: lazy(() => import('../../../views/FourHundredThree')),
     },
+    */
     {
         path: undefined,
         name: 'fourHundredFour',

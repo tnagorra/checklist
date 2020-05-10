@@ -1,6 +1,6 @@
 {
     "name": "checklist",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Checklist",
     "main": "src/index.tsx",
     "keywords": [],
@@ -16,7 +16,8 @@
         "test:watch": "jest --watch",
         "typecheck": "tsc",
         "lint": "eslint ./src --rule 'import/no-unresolved: 0'",
-        "test:coverage": "jest --coverage"
+        "test:coverage": "jest --coverage",
+        "zip": "git archive -o ../my-source.zip HEAD; cd build; zip -r -FS ../../my-extension.zip *"
     },
     "jest": {
         "setupFiles": [
@@ -84,7 +85,6 @@
         "@types/react-loadable": "^5.5.1",
         "@types/react-redux": "^7.1.1",
         "@types/react-router-dom": "^4.3.4",
-        "@types/react-transition-group": "^4.2.4",
         "@typescript-eslint/eslint-plugin": "^1.13.0",
         "@typescript-eslint/parser": "^1.13.0",
         "babel-core": "^7.0.0-bridge.0",
@@ -154,7 +154,6 @@
         "react": "^0.0.0-experimental-33c3af284",
         "react-dom": "^0.0.0-experimental-33c3af284",
         "react-icons": "^3.9.0",
-        "react-router-dom": "^5.0.1",
-        "react-transition-group": "^4.3.0"
+        "react-router-dom": "^5.0.1"
     }
 }

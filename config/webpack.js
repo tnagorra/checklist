@@ -40,7 +40,7 @@ const base = {
     browser_action: {
         default_popup: 'index.html',
     },
-    permissions: ['storage', 'background'],
+    permissions: ['storage'],
     icons: {
         16: 'icons/checklist.svg',
         48: 'icons/checklist.svg',
