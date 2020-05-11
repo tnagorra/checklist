@@ -1,4 +1,4 @@
-# checklist
+# Checklist
 
 To build the extension, run:
 

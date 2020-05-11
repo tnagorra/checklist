@@ -36,15 +36,15 @@ const appIcons = path.resolve(appBase, 'public/icons/');
 /* eslint-disable @typescript-eslint/camelcase */
 const base = {
     manifest_version: 2,
-    short_name: 'checklist',
+    short_name: 'Checklist',
     browser_action: {
         default_popup: 'index.html',
     },
     permissions: ['storage'],
     icons: {
-        16: 'icons/checklist.svg',
-        48: 'icons/checklist.svg',
-        128: 'icons/checklist.svg',
+        16: 'icons/checklist-16.png',
+        48: 'icons/checklist-48.png',
+        128: 'icons/checklist-128.png',
     },
     content_security_policy: "script-src 'self' 'unsafe-eval'; object-src 'self';",
 };
@@ -179,7 +179,7 @@ module.exports = (env) => {
             new HtmlWebpackPlugin({
                 template: appIndexHtml,
                 filename: './index.html',
-                title: 'checklist',
+                title: 'Checklist',
                 chunksSortMode: 'none',
                 // NOTE: addons do not need favicons
             }),
