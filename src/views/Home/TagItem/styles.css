@@ -4,6 +4,7 @@
     padding: var(--spacing-extra-small) var(--spacing-small);
     text-align: center;
     font-size: var(--font-size-small);
+    user-select: none;
 
     &.draggable {
         cursor: move;
@@ -21,6 +22,12 @@
 
     &:not(.minimal) {
         min-width: 30px;
+    }
+
+    &:not(.selected) {
+        &:hover {
+            filter: brightness(80%);
+        }
     }
 
     .count {
