@@ -4,8 +4,13 @@
     background-color: transparent;
     color: inherit;
     font-family: inherit;
+    font-size: inherit;
 
     &:disabled {
         color: var(--color-disabled);
+    }
+
+    &:read-only {
+        color: var(--color-read-only);
     }
 }

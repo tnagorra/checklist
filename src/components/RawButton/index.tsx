@@ -10,6 +10,7 @@ export interface Props extends Omit<React.HTMLProps<HTMLButtonElement>, 'onClick
     onClick?: (name: string, e: React.MouseEvent<HTMLButtonElement>) => void;
     // elementRef: React.RefObject<HTMLButtonElement>;
     type: ButtonType;
+    variant?: 'danger';
 }
 
 function RawButton(props: Props) {
@@ -17,6 +18,7 @@ function RawButton(props: Props) {
         className,
         onClick,
         type,
+        variant,
         ...otherProps
     } = props;
 
@@ -36,7 +38,11 @@ function RawButton(props: Props) {
         // eslint-disable-next-line react/button-has-type
         <button
             type={type}
-            className={_cs(className, styles.rawButton)}
+            className={_cs(
+                className,
+                styles.rawButton,
+                variant === 'danger' && styles.danger,
+            )}
             onClick={onClick ? handleClick : undefined}
             {...otherProps}
         />

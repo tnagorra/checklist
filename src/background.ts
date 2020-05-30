@@ -12,11 +12,16 @@ function setBadge(value: number) {
     }
 }
 
-chrome.storage.local.get(['items'], (storedItems) => {
-    const safeStoredItems = storedItems.items as Item[];
-    const itemsCount = safeStoredItems.filter(item => !item.archived).length - 1;
-    setBadge(itemsCount);
+chrome.runtime.onStartup.addListener(() => {
+    console.warn('Starting application');
+    chrome.storage.local.get(['items'], (storedItems) => {
+        const safeStoredItems = storedItems.items as Item[];
+        console.warn('Reading items', safeStoredItems);
+        const itemsCount = safeStoredItems.filter(item => !item.archived).length - 1;
+        setBadge(itemsCount);
+    });
 });
+
 
 chrome.storage.onChanged.addListener((event) => {
     const safeStoredItems = event.items.newValue as Item[];

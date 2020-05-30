@@ -1,10 +1,15 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { FiMeh } from 'react-icons/fi';
 import { _cs } from '@togglecorp/fujs';
 
 import Draggable from '../Draggable';
-import { Position } from '../types';
 
 import styles from './styles.css';
+
+interface Position {
+    x: number;
+    y: number;
+}
 
 interface Props<T, K, P> {
     className?: string;
@@ -19,7 +24,7 @@ interface Props<T, K, P> {
     onChange: (items: T[]) => void;
 }
 
-function List<T, K extends string | number, P>(props: Props<T, K, P>) {
+function SortableList<T, K extends string | number, P>(props: Props<T, K, P>) {
     const {
         className,
         items,
@@ -59,6 +64,10 @@ function List<T, K extends string | number, P>(props: Props<T, K, P>) {
             const delta = Math.round(translation.y / height);
             const index = filteredItems.findIndex(i => keySelector(i) === id);
             const myItem = filteredItems[index];
+
+            if (lowerLimitSelector && lowerLimitSelector(myItem)) {
+                return;
+            }
 
             const newIndex = index + delta;
             const lowerIndex = lowerLimitSelector
@@ -103,6 +112,15 @@ function List<T, K extends string | number, P>(props: Props<T, K, P>) {
         [items, filteredItems, height, keySelector, onChange],
     );
 
+    if (filteredItems.length <= 0) {
+        return (
+            <div className={_cs(className, styles.emptyMessage)}>
+                <FiMeh className={styles.icon} />
+                <span>Nothing here</span>
+            </div>
+        );
+    }
+
     return (
         <div
             className={_cs(
@@ -110,6 +128,7 @@ function List<T, K extends string | number, P>(props: Props<T, K, P>) {
                 className,
             )}
             style={{
+                // NOTE: I have no idea why 2px works
                 height: `${filteredItems.length * height}px`,
             }}
         >
@@ -145,6 +164,7 @@ function List<T, K extends string | number, P>(props: Props<T, K, P>) {
                         )}
                         key={String(key)}
                         id={key}
+                        disabled={lowerLimitSelector && lowerLimitSelector(item)}
                         onDrag={handleDrag}
                         onDragEnd={handleDragEnd}
                         style={style}
@@ -157,4 +177,4 @@ function List<T, K extends string | number, P>(props: Props<T, K, P>) {
     );
 }
 
-export default List;
+export default SortableList;

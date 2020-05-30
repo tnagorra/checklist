@@ -1,8 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { _cs } from '@togglecorp/fujs';
 
-import { Position } from '../types';
 import styles from './styles.css';
+
+interface Position {
+    x: number;
+    y: number;
+}
+
 
 const POSITION: Position = {
     x: 0,
@@ -10,12 +15,13 @@ const POSITION: Position = {
 };
 
 interface Props<T> {
-    children: React.ReactNode;
+    children: React.ReactElement;
     id: T;
     onDrag: (attr: { translation: Position; id: T }) => void;
     onDragEnd: (attr: { translation: Position; id: T }) => void;
     className?: string;
     style?: React.CSSProperties;
+    disabled?: boolean;
 }
 
 function Draggable<T extends string | number>(props: Props<T>) {
@@ -26,6 +32,7 @@ function Draggable<T extends string | number>(props: Props<T>) {
         onDragEnd,
         className,
         style,
+        disabled,
     } = props;
 
     const [state, setState] = useState({
@@ -37,7 +44,7 @@ function Draggable<T extends string | number>(props: Props<T>) {
     const timeoutRef = useRef<number | undefined>();
 
     const handleMouseDown = useCallback(
-        (event) => {
+        (event: React.MouseEvent<HTMLDivElement>) => {
             const { button, clientX, clientY } = event;
             if (button !== 0) {
                 return;
@@ -51,7 +58,7 @@ function Draggable<T extends string | number>(props: Props<T>) {
                         origin: { x: clientX, y: clientY },
                     }));
                 },
-                200,
+                50,
             );
         },
         [],
@@ -131,20 +138,21 @@ function Draggable<T extends string | number>(props: Props<T>) {
         [state.translation, style],
     );
 
+    const childProps = {
+        onMouseDown: handleMouseDown,
+        onMouseUp: handleMouseUp,
+    };
+
     return (
         <div
-            role="presentation"
             style={divStyle}
             className={_cs(
                 className,
                 styles.draggable,
                 state.isDragging && styles.dragging,
             )}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseUp}
-            onMouseUp={handleMouseUp}
         >
-            {children}
+            {disabled ? children : React.cloneElement(children, childProps)}
         </div>
     );
 }

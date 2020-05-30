@@ -40,10 +40,13 @@ const base = {
     browser_action: {
         default_popup: 'index.html',
     },
+    background: {
+        scripts: ['background.js'],
+    },
     permissions: ['storage'],
     icons: {
-        16: 'icons/checklist-16.png',
-        48: 'icons/checklist-48.png',
+        32: 'icons/checklist-32.png',
+        64: 'icons/checklist-64.png',
         128: 'icons/checklist-128.png',
     },
     content_security_policy: "script-src 'self' 'unsafe-eval'; object-src 'self';",

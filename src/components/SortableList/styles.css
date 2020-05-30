@@ -1,12 +1,25 @@
+.empty-message {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-medium);
+    color: var(--color-read-only);
+
+    .icon {
+        margin: 0 var(--spacing-small);
+    }
+}
+
 .list {
     position: relative;
+    margin: 0px;
+    padding: 0px;
     width: 100%;
     overflow-y: hidden;
 
     .item {
         position: absolute;
         left: 0px;
-        transition: all 500ms;
+        transition: all 200ms;
         margin: 0px;
         padding: 0px;
         width: 100%;
