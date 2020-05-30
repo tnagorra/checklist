@@ -1,50 +1,43 @@
 .home {
+    display: flex;
+    flex-direction: column;
     background-color: var(--color-background);
-    padding: var(--spacing-large);
-    padding-top: 0;
     overflow: auto;
 
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 2; /* Need to do this because of absolute items in sortable list) */
-        margin: 0;
-        background-color: var(--color-background);
-        padding: var(--spacing-small) 0;
-    }
-
-    .group {
-        display: flex;
-        flex-direction: column;
-    }
-}
-
-.item {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--color-separator);
-
-    .text {
+    .content {
         flex-grow: 1;
+        padding: 0 var(--spacing-large);
+        overflow: auto;
 
-        .text-area {
-            resize: none;
-        }
-
-        .delete-button {
-            visibility: hidden;
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 2; /* Need to do this because of absolute items in sortable list) */
+            margin: 0;
+            background-color: var(--color-background);
+            padding: var(--spacing-small) 0;
         }
     }
 
-    &:focus-within {
-        border-bottom: 1px solid var(--color-accent);
-    }
+    .footer {
+        display: flex;
+        align-items: baseline;
+        flex-shrink: 0;
+        border-top: var(--width-separator-thin) solid var(--color-separator);
+        padding: var(--spacing-small) var(--spacing-large);
 
-    &:hover {
-        .text {
-            .delete-button {
-                visibility: visible;
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+
+            .breaker {
+                margin-right: var(--spacing-medium);
             }
+        }
+
+        .header {
+            padding: var(--spacing-small);
+            color: var(--color-read-only);
         }
     }
 }

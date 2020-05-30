@@ -1,167 +1,30 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { FiSquare, FiCheckSquare, FiPlusSquare, FiTrash2 } from 'react-icons/fi';
-import { _cs, randomString } from '@togglecorp/fujs';
+import { _cs, randomString, isDefined, intersection } from '@togglecorp/fujs';
 
-import TextInput from '#components/TextInput';
-import RawButton from '#components/RawButton';
-import List from '../Settings/List';
-// import useDebounce from '#components/useDebounce';
+import SortableList from '#components/SortableList';
+
+import TagItem from './TagItem';
+import Item from './Item';
+
+import { Tag, ChecklistItem } from './types';
+import { tags, tagsMapping } from './tags';
 
 import styles from './styles.css';
 
-interface Item {
-    key: string;
-    value: string;
-    archived?: boolean;
+function hasAll<T>(foo: T[] | undefined, bar: T[] | undefined) {
+    if (!bar || bar.length <= 0) {
+        return true;
+    }
+    if (!foo) {
+        return false;
+    }
+    const fooSet = new Set(foo);
+    const barSet = new Set(bar);
+    const commonSet = intersection(fooSet, barSet);
+    return commonSet.size === barSet.size;
 }
 
-const keySelector = (item: Item) => item.key;
-const isActive = (item: Item) => !item.archived;
-const isArchived = (item: Item) => !!item.archived;
-
-interface ActiveItemProps {
-    item: Item;
-    focusedItem: string | undefined;
-    handleDelete: (key: string) => void;
-    handleEdit: (key: string, value: string) => void;
-    handleKeyDown: (
-        key: string,
-        value: string,
-        name: string,
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => void;
-    handleFocusOut: () => void;
-    handleArchiveToggle: (key: string) => void;
-    disabled?: boolean;
-    lastItem?: boolean;
-}
-function ActiveItem(props: ActiveItemProps) {
-    const {
-        item,
-        focusedItem,
-        handleDelete,
-        handleEdit,
-        handleFocusOut,
-        handleKeyDown,
-        handleArchiveToggle,
-        disabled,
-        lastItem,
-    } = props;
-
-    return (
-        <div
-            className={styles.item}
-        >
-            <TextInput
-                focused={focusedItem === item.key}
-                className={styles.text}
-                inputClassName={styles.textArea}
-                // wrap="soft"
-                // rows={1}
-                // autoFocus={item.key === autoFocusKey}
-                name={item.key}
-                onChange={handleEdit}
-                onBlur={handleFocusOut}
-                onKeyDown={handleKeyDown}
-                value={item.value}
-                disabled={disabled}
-                placeholder={
-                    lastItem
-                        ? 'Add new task'
-                        : undefined
-                }
-                icons={!lastItem ? (
-                    <RawButton
-                        name={item.key}
-                        onClick={handleArchiveToggle}
-                        tabIndex={-1}
-                        title="Mark as done"
-                    >
-                        <FiSquare />
-                    </RawButton>
-                ) : (
-                    <RawButton
-                        // name={item.key}
-                        // onClick={handleArchiveToggle}
-                        tabIndex={-1}
-                        title="Add new task"
-                        disabled
-                    >
-                        <FiPlusSquare />
-                    </RawButton>
-                )}
-                actions={
-                    !lastItem && (
-                        <RawButton
-                            className={styles.deleteButton}
-                            name={item.key}
-                            onClick={handleDelete}
-                            tabIndex={-1}
-                            title="Delete"
-                        >
-                            <FiTrash2 />
-                        </RawButton>
-                    )
-                }
-            />
-        </div>
-    );
-}
-
-interface ArchivedItemProps {
-    item: Item;
-    handleDelete: (key: string) => void;
-    handleEdit: (key: string, value: string) => void;
-    handleArchiveToggle: (key: string) => void;
-}
-function ArchivedItem(props: ArchivedItemProps) {
-    const {
-        item,
-        handleDelete,
-        handleEdit,
-        handleArchiveToggle,
-    } = props;
-
-    return (
-        <div
-            className={styles.item}
-            key={item.key}
-        >
-            <TextInput
-                className={styles.text}
-                inputClassName={styles.textArea}
-                wrap="soft"
-                name={item.key}
-                onChange={handleEdit}
-                value={item.value}
-                rows={1}
-                // disabled={rehydrating}
-                disabled
-                icons={(
-                    <RawButton
-                        name={item.key}
-                        onClick={handleArchiveToggle}
-                        tabIndex={-1}
-                        title="Mark as todo"
-                    >
-                        <FiCheckSquare />
-                    </RawButton>
-                )}
-                actions={(
-                    <RawButton
-                        className={styles.deleteButton}
-                        name={item.key}
-                        onClick={handleDelete}
-                        tabIndex={-1}
-                        title="Delete"
-                    >
-                        <FiTrash2 />
-                    </RawButton>
-                )}
-            />
-        </div>
-    );
-}
+const keySelector = (item: ChecklistItem) => item.key;
 
 interface Props {
     className?: string;
@@ -171,7 +34,30 @@ const Home = (props: Props) => {
     const { className } = props;
 
     const [focusedItem, setFocusedItem] = useState<string | undefined>();
-    const [items, setItems] = useState<Item[]>([]);
+    const [items, setItems] = useState<ChecklistItem[]>([]);
+    const [filters, setFilters] = useState<string[]>([]);
+
+    const handleTagItemClick = useCallback(
+        (item: string) => {
+            setFilters((oldFilters) => {
+                const index = oldFilters.findIndex(f => f === item);
+                let newFilters = [...oldFilters];
+                if (index === -1) {
+                    const tag = tagsMapping[item];
+                    if (tag) {
+                        newFilters = newFilters.filter(
+                            f => tagsMapping[f]?.groupName !== tag.groupName,
+                        );
+                    }
+                    newFilters.push(item);
+                } else {
+                    newFilters.splice(index, 1);
+                }
+                return newFilters;
+            });
+        },
+        [],
+    );
 
     const handleFocusOut = useCallback(
         () => {
@@ -199,6 +85,70 @@ const Home = (props: Props) => {
                 if (isLastElement) {
                     newStateItems.push({ key: randomString(), value: '' });
                 }
+                return newStateItems;
+            });
+        },
+        [],
+    );
+
+    const handleTagDrop = useCallback(
+        (tag: Tag, key: string) => {
+            setItems((stateItems) => {
+                const filteredStateItems = stateItems.filter(item => !item.archived);
+                const filteredIndex = filteredStateItems.findIndex(item => item.key === key);
+                const isLastElement = filteredIndex === filteredStateItems.length - 1;
+
+                if (isLastElement) {
+                    return stateItems;
+                }
+
+                const index = stateItems.findIndex(item => item.key === key);
+                if (index === -1) {
+                    console.error('Cannot find element to edit');
+                    return stateItems;
+                }
+
+                const item = stateItems[index];
+                const newItem = { ...item };
+                if (!newItem.tags || newItem.tags.length <= 0) {
+                    newItem.tags = [tag.title];
+                } else {
+                    newItem.tags = newItem.tags.filter(
+                        i => tagsMapping[i].groupName !== tag.groupName,
+                    );
+                    newItem.tags.push(tag.title);
+                }
+                const newStateItems = [...stateItems];
+                newStateItems.splice(index, 1, newItem);
+                return newStateItems;
+            });
+        },
+        [],
+    );
+    const handleTagRemove = useCallback(
+        (tagName: string, key: string) => {
+            setItems((stateItems) => {
+                const filteredStateItems = stateItems.filter(item => !item.archived);
+                const filteredIndex = filteredStateItems.findIndex(item => item.key === key);
+                const isLastElement = filteredIndex === filteredStateItems.length - 1;
+
+                if (isLastElement) {
+                    return stateItems;
+                }
+
+                const index = stateItems.findIndex(item => item.key === key);
+                if (index === -1) {
+                    console.error('Cannot find element to edit');
+                    return stateItems;
+                }
+
+                const item = stateItems[index];
+                const newItem = { ...item };
+                if (newItem.tags) {
+                    newItem.tags = newItem.tags.filter(tag => tag !== tagName);
+                }
+                const newStateItems = [...stateItems];
+                newStateItems.splice(index, 1, newItem);
                 return newStateItems;
             });
         },
@@ -292,11 +242,72 @@ const Home = (props: Props) => {
         [activeItems, handleDelete],
     );
 
+    // TODO: memoize this
+    const activeItemRendererParams = (_: string, item: ChecklistItem, index: number) => ({
+        item,
+        focusedItem,
+        onDelete: handleDelete,
+        onEdit: handleEdit,
+        onFocusOut: handleFocusOut,
+        onKeyDown: handleKeyDown,
+        onArchiveToggle: handleArchiveToggle,
+        onTagDrop: handleTagDrop,
+        onTagRemove: handleTagRemove,
+        lastItem: index === activeItems.length - 1,
+        tagsMapping,
+    });
+
+    // TODO: memoize this
+    const archivedItemRendererParams = (_: string, item: ChecklistItem) => ({
+        item,
+        focusedItem,
+        onDelete: handleDelete,
+        onEdit: handleEdit,
+        onFocusOut: handleFocusOut,
+        onKeyDown: handleKeyDown,
+        onArchiveToggle: handleArchiveToggle,
+        onTagDrop: handleTagDrop,
+        onTagRemove: handleTagRemove,
+        lastItem: false,
+        tagsMapping,
+        readOnly: true,
+    });
+
+    const lowerLimitSelector = useCallback(
+        (item: ChecklistItem) => {
+            const locationInItem = activeItems.findIndex(i => i.key === item.key);
+            return locationInItem === activeItems.length - 1;
+        },
+        [activeItems],
+    );
+
     const [rehydrating, setRehydrating] = useState(true);
+
+    // TODO: memoize this
+    const allTags = activeItems
+        ?.map(item => item.tags)
+        .flat()
+        .filter(isDefined);
+
+    const isActive = useCallback(
+        (item: ChecklistItem) => (
+            !item.archived && hasAll(item.tags, filters)
+        ),
+        [filters],
+    );
+
+    const isArchived = useCallback(
+        (item: ChecklistItem) => (
+            !!item.archived && hasAll(item.tags, filters)
+        ),
+        [filters],
+    );
+
+    // Load items from storage
     useEffect(
         () => {
             chrome.storage.local.get(['items'], (storedItems) => {
-                const safeStoredItems = storedItems as { items: Item[] };
+                const safeStoredItems = storedItems as { items: ChecklistItem[] };
                 if (safeStoredItems.items && safeStoredItems.items.length > 0) {
                     setItems(safeStoredItems.items);
                 } else {
@@ -310,6 +321,7 @@ const Home = (props: Props) => {
         [],
     );
 
+    // Set items to storage
     useEffect(
         () => {
             if (rehydrating) {
@@ -323,64 +335,74 @@ const Home = (props: Props) => {
         [items, rehydrating],
     );
 
-    const activeItemRendererParams = (_: string, item: Item, index: number) => ({
-        item,
-        focusedItem,
-        handleDelete,
-        handleEdit,
-        handleFocusOut,
-        handleKeyDown,
-        handleArchiveToggle,
-        disabled: rehydrating,
-        lastItem: index === activeItems.length - 1,
-    });
-
-    const archivedItemRendererParams = (_: string, item: Item) => ({
-        item,
-        handleDelete,
-        handleEdit,
-        handleArchiveToggle,
-    });
-
-    const lowerLimitSelector = useCallback(
-        (item: Item) => {
-            const locationInItem = activeItems.findIndex(i => i.key === item.key);
-            return locationInItem === activeItems.length - 1;
-        },
-        [activeItems],
-    );
+    if (rehydrating) {
+        return null;
+    }
 
     return (
         <div className={_cs(className, styles.home)}>
-            {activeItems.length > 0 && (
-                <h3 className={styles.header}>
-                    {`Todo (${activeItems.length - 1})`}
-                </h3>
-            )}
-            <List
-                items={items}
-                onChange={setItems}
-                height={32}
-                keySelector={keySelector}
-                visibleSelector={isActive}
-                lowerLimitSelector={lowerLimitSelector}
-                renderer={ActiveItem}
-                rendererParams={activeItemRendererParams}
-            />
-            {archivedItems.length > 0 && (
-                <h3 className={styles.header}>
-                    {`Done (${archivedItems.length})`}
-                </h3>
-            )}
-            <List
-                items={items}
-                onChange={setItems}
-                height={32}
-                keySelector={keySelector}
-                visibleSelector={isArchived}
-                renderer={ArchivedItem}
-                rendererParams={archivedItemRendererParams}
-            />
+            <div className={styles.content}>
+                {activeItems.length > 0 && (
+                    <>
+                        <h3 className={styles.header}>
+                            Todo
+                        </h3>
+                        <SortableList
+                            items={items}
+                            onChange={setItems}
+                            height={32}
+                            keySelector={keySelector}
+                            visibleSelector={isActive}
+                            lowerLimitSelector={lowerLimitSelector}
+                            renderer={Item}
+                            rendererParams={activeItemRendererParams}
+                        />
+                    </>
+                )}
+                {archivedItems.length > 0 && (
+                    <>
+                        <h3 className={styles.header}>
+                            Done
+                        </h3>
+                        <SortableList
+                            items={items}
+                            onChange={setItems}
+                            height={32}
+                            keySelector={keySelector}
+                            visibleSelector={isArchived}
+                            renderer={Item}
+                            rendererParams={archivedItemRendererParams}
+                        />
+                    </>
+                )}
+            </div>
+            <div className={styles.footer}>
+                <div
+                    className={styles.header}
+                >
+                    Tags
+                </div>
+                <div className={styles.tags}>
+                    {tags.map((tag, index) => (
+                        <TagItem
+                            className={_cs(
+                                index !== tags.length - 1
+                                && tags[index + 1].groupName !== tag.groupName
+                                && styles.breaker,
+                            )}
+                            key={tag.title}
+                            tag={tag}
+                            tagTitle={tag.title}
+                            draggable
+                            title={`${tag.groupName}: ${tag.title}`}
+                            // TODO: could be optimized later
+                            count={allTags?.filter(t => t === tag.title).length}
+                            selected={filters.includes(tag.title)}
+                            onClick={handleTagItemClick}
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };

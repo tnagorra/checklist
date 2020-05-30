@@ -2,6 +2,7 @@
     display: flex;
     outline: none;
     border: 0;
+    border-radius: var(--spacing-extra-small);
     background-color: transparent;
     padding: 0;
     color: inherit;
@@ -10,7 +11,15 @@
     &:disabled {
         color: var(--color-disabled);
     }
+
     &:not(:disabled) {
         cursor: pointer;
+
+        &:hover {
+            background-color: var(--color-hover-background);
+            &.danger {
+                color: var(--color-danger);
+            }
+        }
     }
 }

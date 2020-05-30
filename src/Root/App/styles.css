@@ -2,19 +2,24 @@
     --height-content: 600px;
     --width-content: 450px;
 
+    --spacing-extra-small: 3px;
     --spacing-small: 6px;
     --spacing-medium: 10px;
     --spacing-large: 16px;
 
     --width-separator-thin: 1px;
 
+    --color-danger: #f44336;
     --color-accent: #18bc9c;
+    --color-hover-background: #efefef;
     --color-disabled: #aaaaaa;
+    --color-read-only: #777777;
     --color-separator: #dddddd;
     --color-background: #ffffff;
 
-    --font-size-medium: 16px;
-    --font-size-large: 20px;
+    --font-size-small: 0.9em;
+    --font-size-medium: 1em;
+    --font-size-large: 1.4em;
 
     --font-weight-light: 300;
     --font-weight-medium: 400;
