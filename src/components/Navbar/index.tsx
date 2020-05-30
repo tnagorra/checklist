@@ -20,7 +20,7 @@ const Navbar = (props: Props) => {
                 activeClassName={styles.active}
                 to="/index.html"
             >
-                checklist
+                Checklist
             </NavLink>
             {/*
             <div className={styles.navLinks}>
