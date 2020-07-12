@@ -24,7 +24,9 @@ chrome.runtime.onStartup.addListener(() => {
 
 
 chrome.storage.onChanged.addListener((event) => {
-    const safeStoredItems = event.items.newValue as Item[];
-    const itemsCount = safeStoredItems.filter(item => !item.archived).length - 1;
-    setBadge(itemsCount);
+    if (event.items) {
+        const safeStoredItems = event.items.newValue as Item[];
+        const itemsCount = safeStoredItems.filter(item => !item.archived).length - 1;
+        setBadge(itemsCount);
+    }
 });

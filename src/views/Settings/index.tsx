@@ -7,7 +7,7 @@ interface Props {
     className?: string;
 }
 
-const Settings = (props: Props) => {
+function Settings(props: Props) {
     const { className } = props;
 
     return (
@@ -20,6 +20,6 @@ const Settings = (props: Props) => {
             N/A
         </div>
     );
-};
+}
 
 export default Settings;

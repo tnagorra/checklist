@@ -14,6 +14,10 @@ A simple checklist addon to keep tracks of things.
     - Click on a tag to filter tasks.
     - Drop a tag on an task to assign it.
     - Click on task's tag to remove it.
+- Custom tags can be created.
+    1. Type '@' followed by any alphanumeric characters
+    2. Press 'Space', 'Tab' or 'Enter'
+- Custom tags will be cleared out if it is not used.
 
 ## Get extension
 

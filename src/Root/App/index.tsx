@@ -3,11 +3,10 @@ import Multiplexer from './Multiplexer';
 
 import './styles.css';
 
-interface Props {
+function App() {
+    return (
+        <Multiplexer />
+    );
 }
-
-const App = (props: Props) => (
-    <Multiplexer />
-);
 
 export default App;
