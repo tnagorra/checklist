@@ -10,7 +10,7 @@ import styles from './styles.css';
 interface TitleProps {
     value: string;
 }
-const Title = ({ value }: TitleProps) => {
+function Title({ value }: TitleProps) {
     useEffect(
         () => {
             document.title = value;
@@ -18,16 +18,18 @@ const Title = ({ value }: TitleProps) => {
         [value],
     );
     return null;
-};
+}
 
 interface LoadingProps {
     message: string;
 }
-const Loading = ({ message }: LoadingProps) => (
-    <div className={styles.loading}>
-        {message}
-    </div>
-);
+function Loading({ message }: LoadingProps) {
+    return (
+        <div className={styles.loading}>
+            {message}
+        </div>
+    );
+}
 
 interface Props {
     className?: string;

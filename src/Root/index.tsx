@@ -2,13 +2,12 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-interface Props {
+function Root() {
+    return (
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    );
 }
-
-const Root = (props: Props) => (
-    <BrowserRouter>
-        <App {...props} />
-    </BrowserRouter>
-);
 
 export default Root;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { _cs, randomString, isDefined, intersection } from '@togglecorp/fujs';
+import { _cs, randomString, isDefined, intersection, listToMap } from '@togglecorp/fujs';
 
 import SortableList from '#components/SortableList';
 
@@ -7,9 +7,22 @@ import TagItem from './TagItem';
 import Item from './Item';
 
 import { Tag, ChecklistItem } from './types';
-import { tags, tagsMapping } from './tags';
+import defaultTags from './tags';
 
 import styles from './styles.css';
+
+function getCounts(values: string[]) {
+    const mapping: {
+        [key: string]: number | undefined;
+    } = {};
+    values.forEach((value) => {
+        const mappingValue = mapping[value];
+        mapping[value] = isDefined(mappingValue)
+            ? mappingValue + 1
+            : 1;
+    });
+    return mapping;
+}
 
 function hasAll<T>(foo: T[] | undefined, bar: T[] | undefined) {
     if (!bar || bar.length <= 0) {
@@ -30,12 +43,64 @@ interface Props {
     className?: string;
 }
 
-const Home = (props: Props) => {
+function Home(props: Props) {
     const { className } = props;
 
-    const [focusedItem, setFocusedItem] = useState<string | undefined>();
     const [items, setItems] = useState<ChecklistItem[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
+
     const [filters, setFilters] = useState<string[]>([]);
+    const [focusedItem, setFocusedItem] = useState<string | undefined>();
+    // TODO: move rehydrating logic outside Home component
+    const [rehydrating, setRehydrating] = useState(true);
+
+    const tagsMapping: {
+        [key: string]: Tag & { order: number } | undefined;
+    } = useMemo(
+        () => listToMap(
+            tags,
+            item => item.title.toLocaleLowerCase(),
+            (item, _, i) => ({
+                ...item,
+                order: i,
+            }),
+        ),
+        [tags],
+    );
+
+    const activeItems = useMemo(
+        () => items.filter(item => !item.archived),
+        [items],
+    );
+
+    const archivedItems = useMemo(
+        () => items.filter(item => !!item.archived),
+        [items],
+    );
+
+    const tagsUsageMapping = useMemo(
+        () => {
+            const tgs = activeItems
+                .map(item => item.tags)
+                .filter(isDefined)
+                .flat()
+                .filter(isDefined)
+                .map(item => item.toLowerCase());
+            return getCounts(tgs);
+        },
+        [activeItems],
+    );
+
+    const usedTags = useMemo(
+        () => tags.filter((tag) => {
+            if (tag.groupName !== 'Custom') {
+                return true;
+            }
+            const usageCount = tagsUsageMapping[tag.title.toLowerCase()];
+            return isDefined(usageCount) && usageCount > 0;
+        }),
+        [tags, tagsUsageMapping],
+    );
 
     const handleTagItemClick = useCallback(
         (item: string) => {
@@ -43,10 +108,10 @@ const Home = (props: Props) => {
                 const index = oldFilters.findIndex(f => f === item);
                 let newFilters = [...oldFilters];
                 if (index === -1) {
-                    const tag = tagsMapping[item];
+                    const tag = tagsMapping[item.toLowerCase()];
                     if (tag) {
                         newFilters = newFilters.filter(
-                            f => tagsMapping[f]?.groupName !== tag.groupName,
+                            f => tagsMapping[f.toLowerCase()]?.groupName !== tag.groupName,
                         );
                     }
                     newFilters.push(item);
@@ -56,7 +121,7 @@ const Home = (props: Props) => {
                 return newFilters;
             });
         },
-        [],
+        [tagsMapping],
     );
 
     const handleFocusOut = useCallback(
@@ -111,19 +176,19 @@ const Home = (props: Props) => {
                 const item = stateItems[index];
                 const newItem = { ...item };
                 if (!newItem.tags || newItem.tags.length <= 0) {
-                    newItem.tags = [tag.title];
+                    newItem.tags = [];
                 } else {
-                    newItem.tags = newItem.tags.filter(
-                        i => tagsMapping[i].groupName !== tag.groupName,
-                    );
-                    newItem.tags.push(tag.title);
+                    newItem.tags = newItem.tags.filter(i => (
+                        tagsMapping[i.toLowerCase()]?.groupName !== tag.groupName
+                    ));
                 }
+                newItem.tags.push(tag.title);
                 const newStateItems = [...stateItems];
                 newStateItems.splice(index, 1, newItem);
                 return newStateItems;
             });
         },
-        [],
+        [tagsMapping],
     );
     const handleTagRemove = useCallback(
         (tagName: string, key: string) => {
@@ -188,16 +253,6 @@ const Home = (props: Props) => {
         [],
     );
 
-    const activeItems = useMemo(
-        () => items.filter(item => !item.archived),
-        [items],
-    );
-
-    const archivedItems = useMemo(
-        () => items.filter(item => !!item.archived),
-        [items],
-    );
-
     const handleKeyDown = useCallback(
         (
             key: string,
@@ -205,6 +260,46 @@ const Home = (props: Props) => {
             name: string,
             event: React.KeyboardEvent<HTMLInputElement>,
         ) => {
+            if (key === ' ' || key === 'Tab' || key === 'Enter') {
+                const matching = /\s+@\w+$/;
+                const match = value.match(matching);
+                if (match) {
+                    event.preventDefault();
+
+                    const newValue = value.slice(0, value.length - match[0].length);
+                    handleEdit(newValue, name);
+
+                    const newColor = Math.floor(Math.random() * 360);
+
+                    // Trim so that we remove all the white space
+                    // Slice to remove the initial @ symbol
+                    const tagName = match[0].trim().slice(1);
+
+                    const tag = tagsMapping[tagName.toLowerCase()];
+
+                    if (tag) {
+                        handleTagDrop(tag, name);
+                    } else {
+                        const newTag: Tag = {
+                            color: `hsl(${newColor}, 100%, 85%)`,
+                            title: tagName,
+                            groupName: 'Custom',
+                        };
+                        setTags((myTags) => {
+                            if (myTags.find(item => item.title === tagName)) {
+                                return myTags;
+                            }
+                            return [
+                                ...myTags,
+                                newTag,
+                            ];
+                        });
+                        handleTagDrop(newTag, name);
+                    }
+                    return;
+                }
+            }
+
             if (key === 'Enter') {
                 event.preventDefault();
 
@@ -239,39 +334,53 @@ const Home = (props: Props) => {
                 }
             }
         },
-        [activeItems, handleDelete],
+        [activeItems, handleDelete, handleEdit, handleTagDrop, tagsMapping],
     );
 
-    // TODO: memoize this
-    const activeItemRendererParams = (_: string, item: ChecklistItem, index: number) => ({
-        item,
-        focusedItem,
-        onDelete: handleDelete,
-        onEdit: handleEdit,
-        onFocusOut: handleFocusOut,
-        onKeyDown: handleKeyDown,
-        onArchiveToggle: handleArchiveToggle,
-        onTagDrop: handleTagDrop,
-        onTagRemove: handleTagRemove,
-        lastItem: index === activeItems.length - 1,
-        tagsMapping,
-    });
+    const activeItemRendererParams = useCallback(
+        (_: string, item: ChecklistItem, index: number) => ({
+            item,
+            focusedItem,
+            onDelete: handleDelete,
+            onEdit: handleEdit,
+            onFocusOut: handleFocusOut,
+            onKeyDown: handleKeyDown,
+            onArchiveToggle: handleArchiveToggle,
+            onTagDrop: handleTagDrop,
+            onTagRemove: handleTagRemove,
+            lastItem: index === activeItems.length - 1,
+            tagsMapping,
+        }),
+        [
+            handleDelete, handleEdit, handleArchiveToggle,
+            handleFocusOut, handleKeyDown,
+            handleTagDrop, handleTagRemove,
+            activeItems.length, focusedItem, tagsMapping,
+        ],
+    );
 
-    // TODO: memoize this
-    const archivedItemRendererParams = (_: string, item: ChecklistItem) => ({
-        item,
-        focusedItem,
-        onDelete: handleDelete,
-        onEdit: handleEdit,
-        onFocusOut: handleFocusOut,
-        onKeyDown: handleKeyDown,
-        onArchiveToggle: handleArchiveToggle,
-        onTagDrop: handleTagDrop,
-        onTagRemove: handleTagRemove,
-        lastItem: false,
-        tagsMapping,
-        readOnly: true,
-    });
+    const archivedItemRendererParams = useCallback(
+        (_: string, item: ChecklistItem) => ({
+            item,
+            focusedItem,
+            onDelete: handleDelete,
+            onEdit: handleEdit,
+            onFocusOut: handleFocusOut,
+            onKeyDown: handleKeyDown,
+            onArchiveToggle: handleArchiveToggle,
+            onTagDrop: handleTagDrop,
+            onTagRemove: handleTagRemove,
+            lastItem: false,
+            tagsMapping,
+            readOnly: true,
+        }),
+        [
+            handleDelete, handleEdit, handleArchiveToggle,
+            handleFocusOut, handleKeyDown,
+            handleTagDrop, handleTagRemove,
+            focusedItem, tagsMapping,
+        ],
+    );
 
     const lowerLimitSelector = useCallback(
         (item: ChecklistItem) => {
@@ -280,14 +389,6 @@ const Home = (props: Props) => {
         },
         [activeItems],
     );
-
-    const [rehydrating, setRehydrating] = useState(true);
-
-    // TODO: memoize this
-    const allTags = activeItems
-        ?.map(item => item.tags)
-        .flat()
-        .filter(isDefined);
 
     const isActive = useCallback(
         (item: ChecklistItem) => (
@@ -306,8 +407,14 @@ const Home = (props: Props) => {
     // Load items from storage
     useEffect(
         () => {
-            chrome.storage.local.get(['items'], (storedItems) => {
-                const safeStoredItems = storedItems as { items: ChecklistItem[] };
+            chrome.storage.local.get(['items', 'tags'], (storedItems) => {
+                interface Storage {
+                    items: ChecklistItem[] | undefined;
+                    tags: Tag[] | undefined;
+                }
+
+                const safeStoredItems = storedItems as Storage;
+
                 if (safeStoredItems.items && safeStoredItems.items.length > 0) {
                     setItems(safeStoredItems.items);
                 } else {
@@ -315,13 +422,20 @@ const Home = (props: Props) => {
                         { key: '0', value: '' },
                     ]);
                 }
+
+                if (safeStoredItems.tags && safeStoredItems.tags.length > 0) {
+                    setTags(safeStoredItems.tags);
+                } else {
+                    setTags(defaultTags);
+                }
+
                 setRehydrating(false);
             });
         },
         [],
     );
 
-    // Set items to storage
+    // TODO: debounce writing to storage
     useEffect(
         () => {
             if (rehydrating) {
@@ -333,6 +447,18 @@ const Home = (props: Props) => {
             });
         },
         [items, rehydrating],
+    );
+    useEffect(
+        () => {
+            if (rehydrating) {
+                return;
+            }
+
+            chrome.storage.local.set({
+                tags: usedTags,
+            });
+        },
+        [usedTags, rehydrating],
     );
 
     if (rehydrating) {
@@ -384,10 +510,12 @@ const Home = (props: Props) => {
                 </div>
                 <div className={styles.tags}>
                     {tags.map((tag, index) => (
+                        // Note: could have just shown usedTags but you
+                        // can't clear out the filter if the badge just disappears
                         <TagItem
                             className={_cs(
                                 index !== tags.length - 1
-                                && tags[index + 1].groupName !== tag.groupName
+                                && tags[index + 1]?.groupName !== tag.groupName
                                 && styles.breaker,
                             )}
                             key={tag.title}
@@ -395,8 +523,7 @@ const Home = (props: Props) => {
                             tagTitle={tag.title}
                             draggable
                             title={`${tag.groupName}: ${tag.title}`}
-                            // TODO: could be optimized later
-                            count={allTags?.filter(t => t === tag.title).length}
+                            count={tagsUsageMapping[tag.title.toLowerCase()]}
                             selected={filters.includes(tag.title)}
                             onClick={handleTagItemClick}
                         />
@@ -405,6 +532,6 @@ const Home = (props: Props) => {
             </div>
         </div>
     );
-};
+}
 
 export default Home;

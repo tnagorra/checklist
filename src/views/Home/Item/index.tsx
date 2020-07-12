@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FiSquare, FiCheckSquare, FiPlusSquare, FiTrash2 } from 'react-icons/fi';
 import { FaGripVertical } from 'react-icons/fa';
-import { _cs, compareNumber, Obj } from '@togglecorp/fujs';
+import { _cs, compareNumber } from '@togglecorp/fujs';
 
 import useDropHandler from '#components/useDropHandler';
 import TextInput from '#components/TextInput';
@@ -33,7 +33,9 @@ interface ItemProps {
 
     onMouseDown?: (event: React.MouseEvent<HTMLDivElement>) => void;
     onMouseUp?: () => void;
-    tagsMapping: Obj<Tag & { order: number }>;
+    tagsMapping: {
+        [key: string]: Tag & { order: number } | undefined;
+    };
 }
 function Item(props: ItemProps) {
     const {
@@ -92,14 +94,18 @@ function Item(props: ItemProps) {
         [onTagRemove, item.key],
     );
 
-    // TODO: memoize this
-    const sortedTags = item.tags && item.tags.length > 0
-        ? [...item.tags]
-            .sort((a, b) => compareNumber(
-                tagsMapping[a]?.order,
-                tagsMapping[b]?.order,
-            ))
-        : undefined;
+    const sortedTags = useMemo(
+        () => (
+            item.tags && item.tags.length > 0
+                ? [...item.tags]
+                    .sort((a, b) => compareNumber(
+                        tagsMapping[a.toLowerCase()]?.order,
+                        tagsMapping[b.toLowerCase()]?.order,
+                    ))
+                : undefined
+        ),
+        [item.tags, tagsMapping],
+    );
 
     return (
         <div
@@ -176,7 +182,7 @@ function Item(props: ItemProps) {
                                         <TagItem
                                             key={tag}
                                             tagTitle={tag}
-                                            tag={tagsMapping[tag]}
+                                            tag={tagsMapping[tag.toLowerCase()]}
                                             minimal
                                             title={`Remove tag '${tag}'`}
                                             onClick={handleTagRemove}

@@ -57,10 +57,7 @@ function TagItem(props: TagItemProps) {
                 !!onClick && styles.clickable,
             )}
             title={title}
-            style={selected ? {
-                backgroundColor: tag?.altColor || 'hsl(0, 0%, 50%)',
-                color: tag?.altTextColor || 'black',
-            } : {
+            style={{
                 backgroundColor: tag?.color || 'hsl(0, 0%, 90%)',
             }}
             role="presentation"
@@ -69,11 +66,19 @@ function TagItem(props: TagItemProps) {
             onClick={handleClick}
         >
             {minimal ? (
-                <span>{tagTitle[0].toLowerCase()}</span>
+                <span>
+                    {tagTitle.slice(0, 2).toLowerCase()}
+                </span>
             ) : (
                 <>
-                    {count && count > 0 ? <b className={styles.count}>{count}</b> : undefined}
-                    <span>{tagTitle}</span>
+                    {count && count > 0 && (
+                        <b className={styles.count}>
+                            {count}
+                        </b>
+                    )}
+                    <span>
+                        {tagTitle}
+                    </span>
                 </>
             )}
         </div>

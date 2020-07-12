@@ -1,7 +1,5 @@
 export interface Tag {
     color: string;
-    altColor: string;
-    altTextColor: string;
     title: string;
     groupName: string;
 }
