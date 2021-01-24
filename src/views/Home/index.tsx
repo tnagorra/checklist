@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { _cs, randomString, isDefined, intersection, listToMap } from '@togglecorp/fujs';
+import { FiTrash2 } from 'react-icons/fi';
 
+import RawButton from '#components/RawButton';
 import SortableList from '#components/SortableList';
 
 import TagItem from './TagItem';
@@ -190,6 +192,7 @@ function Home(props: Props) {
         },
         [tagsMapping],
     );
+
     const handleTagRemove = useCallback(
         (tagName: string, key: string) => {
             setItems((stateItems) => {
@@ -251,6 +254,25 @@ function Home(props: Props) {
             });
         },
         [],
+    );
+
+    const isArchived = useCallback(
+        (item: ChecklistItem) => (
+            !!item.archived && hasAll(item.tags, filters)
+        ),
+        [filters],
+    );
+
+    const handleDeleteAllCompleted = useCallback(
+        () => {
+            setItems(stateItems => stateItems.filter(item => !isArchived(item)));
+        },
+        [setItems, isArchived],
+    );
+
+    const filteredArchivedItems = useMemo(
+        () => items.filter(isArchived),
+        [items, isArchived],
     );
 
     const handleKeyDown = useCallback(
@@ -397,13 +419,6 @@ function Home(props: Props) {
         [filters],
     );
 
-    const isArchived = useCallback(
-        (item: ChecklistItem) => (
-            !!item.archived && hasAll(item.tags, filters)
-        ),
-        [filters],
-    );
-
     // Load items from storage
     useEffect(
         () => {
@@ -487,9 +502,23 @@ function Home(props: Props) {
                 )}
                 {archivedItems.length > 0 && (
                     <>
-                        <h3 className={styles.header}>
-                            Done
-                        </h3>
+                        <div className={styles.heading}>
+                            <h3 className={styles.header}>
+                                Done
+                            </h3>
+                            {filteredArchivedItems.length > 0 && (
+                                <RawButton
+                                    className={styles.button}
+                                    name="delete-all"
+                                    onClick={handleDeleteAllCompleted}
+                                    tabIndex={-1}
+                                    title={`Remove ${filteredArchivedItems.length} items`}
+                                    variant="danger"
+                                >
+                                    <FiTrash2 />
+                                </RawButton>
+                            )}
+                        </div>
                         <SortableList
                             items={items}
                             onChange={setItems}
@@ -504,7 +533,7 @@ function Home(props: Props) {
             </div>
             <div className={styles.footer}>
                 <div
-                    className={styles.header}
+                    className={styles.title}
                 >
                     Tags
                 </div>

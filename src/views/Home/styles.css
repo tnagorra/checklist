@@ -9,13 +9,24 @@
         padding: 0 var(--spacing-large);
         overflow: auto;
 
-        .header {
+        .heading {
+            display: flex;
             position: sticky;
             top: 0;
+            align-items: center;
             z-index: 2; /* Need to do this because of absolute items in sortable list) */
-            margin: 0;
-            background-color: var(--color-background);
-            padding: var(--spacing-small) 0;
+
+            .header {
+                flex-grow: 1;
+                margin: 0;
+                background-color: var(--color-background);
+                padding: var(--spacing-small) 0;
+            }
+
+            .button {
+                flex-shrink: 0;
+                margin: 0 var(--spacing-medium);
+            }
         }
     }
 
@@ -35,7 +46,7 @@
             }
         }
 
-        .header {
+        .title {
             padding: var(--spacing-small);
             color: var(--color-read-only);
         }
