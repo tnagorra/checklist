@@ -192,6 +192,7 @@ function Home(props: Props) {
         },
         [tagsMapping],
     );
+
     const handleTagRemove = useCallback(
         (tagName: string, key: string) => {
             setItems((stateItems) => {
@@ -262,13 +263,17 @@ function Home(props: Props) {
         [filters],
     );
 
-    const archivedFilteredItems = useMemo(() => (
-        items.filter(item => !!item.archived && hasAll(item.tags, filters))
-    ), [items, filters]);
+    const handleDeleteAllCompleted = useCallback(
+        () => {
+            setItems(stateItems => stateItems.filter(item => !isArchived(item)));
+        },
+        [setItems, isArchived],
+    );
 
-    const handleDeleteAllCompleted = useCallback(() => {
-        setItems(stateItems => stateItems.filter(item => !isArchived(item)));
-    }, [setItems, isArchived]);
+    const filteredArchivedItems = useMemo(
+        () => items.filter(isArchived),
+        [items, isArchived],
+    );
 
     const handleKeyDown = useCallback(
         (
@@ -501,13 +506,13 @@ function Home(props: Props) {
                             <h3 className={styles.header}>
                                 Done
                             </h3>
-                            {archivedFilteredItems.length > 0 && (
+                            {filteredArchivedItems.length > 0 && (
                                 <RawButton
                                     className={styles.button}
                                     name="delete-all"
                                     onClick={handleDeleteAllCompleted}
                                     tabIndex={-1}
-                                    title="Remove filtered done items"
+                                    title={`Remove ${filteredArchivedItems.length} items`}
                                     variant="danger"
                                 >
                                     <FiTrash2 />
@@ -528,7 +533,7 @@ function Home(props: Props) {
             </div>
             <div className={styles.footer}>
                 <div
-                    className={styles.header}
+                    className={styles.title}
                 >
                     Tags
                 </div>

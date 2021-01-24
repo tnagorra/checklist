@@ -25,6 +25,7 @@
 
             .button {
                 flex-shrink: 0;
+                margin: 0 var(--spacing-medium);
             }
         }
     }
@@ -45,7 +46,7 @@
             }
         }
 
-        .header {
+        .title {
             padding: var(--spacing-small);
             color: var(--color-read-only);
         }
