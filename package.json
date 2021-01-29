@@ -151,7 +151,7 @@
         "core-js": "3",
         "immer": "^3.2.0",
         "memoize-one": "^5.0.5",
-        "react": "^0.0.0-experimental-33c3af284",
+        "react": "^0.14.0",
         "react-dom": "^0.0.0-experimental-33c3af284",
         "react-icons": "^3.9.0",
         "react-router-dom": "^5.0.1"
